@@ -2,6 +2,7 @@ package ahchacha.ahchacha.domain;
 
 import ahchacha.ahchacha.domain.common.BaseEntity;
 import ahchacha.ahchacha.domain.common.enums.PersonOrOfficial;
+import ahchacha.ahchacha.domain.common.enums.Reservation;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
@@ -46,6 +47,10 @@ public class Item extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(10) DEFAULT 'PERSON'")
     private PersonOrOfficial personOrOfficial; // 개인 OR 학생회
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Reservation reservation; // 가능, 불가
 
     @ElementCollection
     @CollectionTable(name = "item_images", joinColumns = @JoinColumn(name = "item_id"))
