@@ -32,6 +32,11 @@ public class ItemReview extends BaseEntity {
     @Column(nullable = false)
     private PersonType personType;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private User user;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
