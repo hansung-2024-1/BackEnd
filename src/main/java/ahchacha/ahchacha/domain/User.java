@@ -23,6 +23,10 @@ public class User {
     @Column(nullable = false, length = 15)
     private String nickname;
 
+    private String track1;
+
+    private String track2;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item> items = new ArrayList<>();
 
