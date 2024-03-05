@@ -1,6 +1,7 @@
 package ahchacha.ahchacha.domain;
 
 import ahchacha.ahchacha.domain.common.BaseEntity;
+import ahchacha.ahchacha.domain.common.enums.Category;
 import ahchacha.ahchacha.domain.common.enums.PersonOrOfficial;
 import ahchacha.ahchacha.domain.common.enums.Reservation;
 import jakarta.persistence.*;
@@ -56,6 +57,10 @@ public class Item extends BaseEntity {
     @CollectionTable(name = "item_images", joinColumns = @JoinColumn(name = "item_id"))
     @Column(name = "image_url")
     private List<String> imageUrls; //아이템 이미지
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Category category; //아이템 카테고리
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
