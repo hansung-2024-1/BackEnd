@@ -14,7 +14,7 @@ public class MessageController {
 
     @MessageMapping("/chat/message")
     public void enter(ChatMessage message) {
-        if (ChatMessage.MessageType.ENTER.equals(message.getType())) {
+        if (ChatMessage.MessageType.GREETING.equals(message.getType())) {
             message.setMessage(message.getSender()+"님이 입장하였습니다.");
         }
         sendingOperations.convertAndSend("/topic/chat/room/"+message.getRoomId(),message);
