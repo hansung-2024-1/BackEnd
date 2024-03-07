@@ -16,11 +16,10 @@ import java.util.List;
 @AllArgsConstructor
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Getter
-    @Column(nullable = false, length = 15)
+    @Column(nullable = true, length = 15)
     private String nickname;
 
     private String track1;
