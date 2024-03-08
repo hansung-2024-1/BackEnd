@@ -2,6 +2,7 @@ package ahchacha.ahchacha.service;
 
 import ahchacha.ahchacha.domain.Item;
 import ahchacha.ahchacha.domain.User;
+import ahchacha.ahchacha.domain.common.enums.Category;
 import ahchacha.ahchacha.dto.ItemDto;
 import ahchacha.ahchacha.repository.ItemRepository;
 import ahchacha.ahchacha.repository.UserRepository;
@@ -70,6 +71,31 @@ public class ItemService {
 
         Pageable pageable = PageRequest.of(page-1, 6, Sort.by(sorts));
         Page<Item> itemPage = itemRepository.findAll(pageable);
+        return ItemDto.toDtoPage(itemPage);
+    }
+
+    public Page<ItemDto.ItemResponseDto> searchItemByTitle(String title,int page) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("createdAt"));
+        Pageable pageable = PageRequest.of(page - 1, 6, Sort.by(sorts));
+
+        Page<Item> itemPage;
+
+        itemPage = itemRepository.findByTitleContaining(title, pageable);
+
+        return ItemDto.toDtoPage(itemPage);
+    }
+
+    public Page<ItemDto.ItemResponseDto> searchItemByCategory(String categoryStr, int page) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("createdAt"));
+        Pageable pageable = PageRequest.of(page - 1, 6, Sort.by(sorts));
+
+        // String to Category enum
+        Category category = Category.valueOf(categoryStr.toUpperCase());
+
+        Page<Item> itemPage = itemRepository.findByCategory(category, pageable);
+
         return ItemDto.toDtoPage(itemPage);
     }
 }
