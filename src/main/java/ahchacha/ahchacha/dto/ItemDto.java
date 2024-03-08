@@ -16,6 +16,7 @@ public class ItemDto {
     @Getter
     @Builder
     public static class ItemRequestDto {
+        private Long userId;
         private String title;
         private int firstPrice;
         private int price;

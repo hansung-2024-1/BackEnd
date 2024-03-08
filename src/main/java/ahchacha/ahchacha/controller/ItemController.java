@@ -23,7 +23,7 @@ public class ItemController {
 
     @PostMapping
     public ResponseEntity<ItemDto.ItemResponseDto> create(@RequestBody ItemDto.ItemRequestDto itemRequestDto) {
-        Item item = itemService.save(itemRequestDto);
+        Item item = itemService.save(itemRequestDto.getUserId(), itemRequestDto);
         ItemDto.ItemResponseDto itemResponseDto = ItemDto.ItemResponseDto.toDto(item);
         return new ResponseEntity<>(itemResponseDto, HttpStatus.CREATED);
     }
