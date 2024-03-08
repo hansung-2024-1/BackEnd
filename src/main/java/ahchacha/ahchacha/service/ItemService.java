@@ -74,22 +74,27 @@ public class ItemService {
         return ItemDto.toDtoPage(itemPage);
     }
 
-    public Page<ItemDto.ItemResponseDto> searchItem(String title, Category category,int page) {
+    public Page<ItemDto.ItemResponseDto> searchItemByTitle(String title,int page) {
         List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(Sort.Order.desc("createdAt"));
         Pageable pageable = PageRequest.of(page - 1, 6, Sort.by(sorts));
 
         Page<Item> itemPage;
 
-        if(title == null){
-            itemPage = itemRepository.findByCategoryContaining(category, pageable);
-        }
-        else if(category == null) {
-            itemPage = itemRepository.findByTitleContaining(title, pageable);
-        }
-        else {
-            itemPage = itemRepository.findByTitleContainingOrCategory(title, category, pageable);
-        }
+        itemPage = itemRepository.findByTitleContaining(title, pageable);
+
+        return ItemDto.toDtoPage(itemPage);
+    }
+
+    public Page<ItemDto.ItemResponseDto> searchItemByCategory(String categoryStr, int page) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("createdAt"));
+        Pageable pageable = PageRequest.of(page - 1, 6, Sort.by(sorts));
+
+        // String to Category enum
+        Category category = Category.valueOf(categoryStr.toUpperCase());
+
+        Page<Item> itemPage = itemRepository.findByCategory(category, pageable);
 
         return ItemDto.toDtoPage(itemPage);
     }
