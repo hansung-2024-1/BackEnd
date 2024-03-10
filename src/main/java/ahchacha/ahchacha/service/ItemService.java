@@ -31,17 +31,21 @@ public class ItemService {
         Item item = Item.builder()
                 .user(user)
                 .title(itemDto.getTitle())
+                .quantity(itemDto.getQuantity())
+                .pricePerHour(itemDto.getPricePerHour())
                 .firstPrice(itemDto.getFirstPrice())
-                .price(itemDto.getPrice())
                 .canBorrowDateTime(itemDto.getCanBorrowDateTime())
                 .returnDateTime(itemDto.getReturnDateTime())
                 .borrowPlace(itemDto.getBorrowPlace())
                 .returnPlace(itemDto.getReturnPlace())
-                .personOrOfficial(itemDto.getPersonOrOfficial())
+//                .personOrOfficial(itemDto.getPersonOrOfficial())
                 .reservation(itemDto.getReservation())
                 .imageUrls(itemDto.getImageUrls())
                 .category(itemDto.getCategory())
                 .build();
+
+        item.setFirstPrice(itemDto.getPricePerHour());
+
         return itemRepository.save(item);
     }
 

@@ -19,13 +19,14 @@ public class ItemDto {
     public static class ItemRequestDto {
         private Long userId;
         private String title;
+        private int quantity;
+        private int pricePerHour;
         private int firstPrice;
-        private int price;
         private LocalDateTime canBorrowDateTime;
         private LocalDateTime returnDateTime;
         private String borrowPlace;
         private String returnPlace;
-        private PersonOrOfficial personOrOfficial;
+//        private PersonOrOfficial personOrOfficial;
         private Reservation reservation;
         private List<String> imageUrls;
         private Category category;
@@ -37,13 +38,14 @@ public class ItemDto {
     public static class ItemResponseDto {
         private Long id;
         private String title;
+        private int quantity;
+        private int pricePerHour;
         private int firstPrice;
-        private int price;
         private LocalDateTime canBorrowDateTime;
         private LocalDateTime returnDateTime;
         private String borrowPlace;
         private String returnPlace;
-        private PersonOrOfficial personOrOfficial;
+//        private PersonOrOfficial personOrOfficial;
         private Reservation reservation;
         private List<String> imageUrls;
         private Category category;
@@ -54,13 +56,14 @@ public class ItemDto {
             return ItemResponseDto.builder()
                     .id(item.getId())
                     .title(item.getTitle())
+                    .quantity(item.getQuantity())
+                    .pricePerHour(item.getPricePerHour())
                     .firstPrice(item.getFirstPrice())
-                    .price(item.getPrice())
                     .canBorrowDateTime(item.getCanBorrowDateTime())
                     .returnDateTime(item.getReturnDateTime())
                     .borrowPlace(item.getBorrowPlace())
                     .returnPlace(item.getReturnPlace())
-                    .personOrOfficial(item.getPersonOrOfficial())
+//                    .personOrOfficial(item.getPersonOrOfficial())
                     .reservation(item.getReservation())
                     .imageUrls(item.getImageUrls())
                     .category(item.getCategory())
