@@ -55,7 +55,7 @@ public class ItemController {
     @Operation(summary = "아이템 검색", description = "제목으로 검색")
     @GetMapping("/search-title")
     public ResponseEntity<Page<ItemDto.ItemResponseDto>> searchItemByTitle(@RequestParam(value = "title") String title,
-                                                                     @RequestParam(value = "page", defaultValue = "1") int page) {
+                                                                           @RequestParam(value = "page", defaultValue = "1") int page) {
 
         Page<ItemDto.ItemResponseDto> itemPages = itemService.searchItemByTitle(title, page);
         return ResponseEntity.ok(itemPages);
@@ -64,7 +64,7 @@ public class ItemController {
     @Operation(summary = "아이템 검색", description = "카테고리로 검색")
     @GetMapping("/search-category")
     public ResponseEntity<Page<ItemDto.ItemResponseDto>> searchItemByCategory(@RequestParam(value = "category") String category,
-                                                                           @RequestParam(value = "page", defaultValue = "1") int page) {
+                                                                              @RequestParam(value = "page", defaultValue = "1") int page) {
 
         Page<ItemDto.ItemResponseDto> itemPages = itemService.searchItemByCategory(category, page);
         return ResponseEntity.ok(itemPages);
