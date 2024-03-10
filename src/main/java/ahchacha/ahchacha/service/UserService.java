@@ -61,7 +61,7 @@ public class UserService {
         session.setAttribute("cookies", cookies);
 
         // 학생정보 생성
-       User user;
+        User user;
 
         // 학생 정보가 존재하면 해당 학생 정보를 가져옴
         Optional<User> optionalStudent = userRepository.findById(stuId);
@@ -70,6 +70,7 @@ public class UserService {
         } else {
             // 학번, 1트랙, 2트랙으로 학생 정보 만들기
             user = userRepository.save(getNewStudent(session, stuId));
+            session.setAttribute("user", user);
         }
 
         if (redirectUrl.equals("http://info.hansung.ac.kr/h_dae/dae_main.html") && success) {
@@ -141,17 +142,52 @@ public class UserService {
         Document doc = response.parse();
         Element link = doc.select("a.d-block").first();
 
-        String text = link.html(); // "모바일소프트웨어트랙<br> 웹공학트랙<br> 황준현"
+        String text = link.html(); // "모바일소프트웨어트랙<br> 웹공학트랙<br> 김동욱"
         String[] split = text.split("<br>");
 
         String track1 = split[0].trim(); // "모바일소프트웨어트랙"
         String track2 = split[1].trim(); // "웹공학트랙"
+        String name = split[2].trim(); // 김동욱
 
         return User.builder()
                 .id(stuId)
+                .name(name)
                 .track1(track1)
                 .track2(track2)
                 .build();
+    }
+
+    public String logout(HttpSession session) throws IOException {
+
+        // 세션 유효성 검사
+        if (session == null || session.getAttribute("cookies") == null) {
+            throw new RuntimeException("error!");
+        }
+
+        String url = "https://info.hansung.ac.kr/sso_logout.jsp";
+
+        @SuppressWarnings(value = "unchecked")
+        Map<String, String> cookies = (Map<String, String>) session.getAttribute("cookies");
+
+        Jsoup.connect(url)
+                .cookies(Objects.requireNonNull(cookies))
+                .method(Connection.Method.GET)
+                .execute();
+
+        // 세션 삭제
+        session.invalidate();
+
+        return "logout success";
+    }
+
+    public void setNickname(String nickname, HttpSession session){
+
+        // 세션에서 사용자 정보를 가져옴
+        User user = (User) session.getAttribute("user");
+        if(user != null){
+            user.setNickname(nickname);
+            userRepository.save(user);
+        }
     }
 
 }
