@@ -27,11 +27,14 @@ public class Item extends BaseEntity {
     @Column(nullable = false)
     private String title; //제목
 
+    @Column(nullable = false)
+    private int quantity; //수량
+
+    @Column(name = "pricePerHour")
+    private int pricePerHour; //대여비
+
     @Column(name = "first_price")
     private int firstPrice; //보증금
-
-    @Column(name = "price")
-    private int price; //대여비
 
     @Column(nullable = false)
     private LocalDateTime canBorrowDateTime; //대여가능 날짜,시간
@@ -45,13 +48,13 @@ public class Item extends BaseEntity {
     @Column(nullable = false)
     private String returnPlace; //반납 장소
 
-    @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "VARCHAR(10) DEFAULT 'PERSON'")
-    private PersonOrOfficial personOrOfficial; // 개인 OR 학생회
+//    @Enumerated(EnumType.STRING)
+//    @Column(columnDefinition = "VARCHAR(10) DEFAULT 'PERSON'")
+//    private PersonOrOfficial personOrOfficial; // 개인 OR 학생회
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Reservation reservation; // 가능, 불가
+    private Reservation reservation; // 예약 가능, 불가
 
     @ElementCollection
     @CollectionTable(name = "item_images", joinColumns = @JoinColumn(name = "item_id"))
@@ -62,6 +65,12 @@ public class Item extends BaseEntity {
     @Column(nullable = false)
     private Category category; //아이템 카테고리
 
+    public void setFirstPrice(int pricePerHour) {
+        this.pricePerHour = pricePerHour;
+        // 대여비의 10% -> 보증금
+        this.firstPrice = (int) (pricePerHour * 0.1);
+    }
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -69,4 +78,5 @@ public class Item extends BaseEntity {
 
     @OneToOne(mappedBy = "item", cascade = CascadeType.ALL)
     private ItemReview itemReview;
+
 }
