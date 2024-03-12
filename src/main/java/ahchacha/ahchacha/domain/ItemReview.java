@@ -41,4 +41,5 @@ public class ItemReview extends BaseEntity {
     @JoinColumn(name = "item_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Item item;
+
 }
