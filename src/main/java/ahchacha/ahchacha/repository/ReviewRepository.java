@@ -7,10 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReviewRepository extends JpaRepository<ItemReview,Long> {
 
-    Page<ItemReview> findByItemIdAndHighScore(Pageable pageable);
-    Page<ItemReview> findByItemIdAndLowScore(Pageable pageable);
-    Page<ItemReview> findByUserIdAndHighScore(Pageable pageable);
-    Page<ItemReview> findByUserIdAndLowScore(Pageable pageable);
-    Page<ItemReview> findByItemId(Pageable pageable);
-    Page<ItemReview> findByUserId(Pageable pageable);
+
+    Page<ItemReview> findByItemId(Long id, Pageable pageable);
+    Page<ItemReview> findByUserId(Long id, Pageable pageable);
 }

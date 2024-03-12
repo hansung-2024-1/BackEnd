@@ -18,7 +18,6 @@ public class ReviewDto {
     @Setter
     @Builder
     public static class ReviewRequestDto {
-        private Long reviewId;
         private Long userId;
         private Long itemId;
         private String reviewComment;

@@ -32,6 +32,7 @@ public class ReviewController {
     }
 
     // 리뷰 등록
+    @Operation(summary = "리뷰 등록하기")
     @PostMapping("/{userId}/{itemId}")
     public ResponseEntity<ItemReview> saveReview(@PathVariable Long userId, @PathVariable Long itemId, @RequestBody ReviewDto.ReviewRequestDto reviewDto) {
         try {
@@ -42,12 +43,14 @@ public class ReviewController {
         }
     }
 
+    @Operation(summary = "아이템 아이디로 리뷰 조회")
     @GetMapping("/{itemId}/reviews")
     public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByItemId(@RequestParam(value = "page", defaultValue = "1") int page, @PathVariable Long itemId) {
-        Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByItemId(page);
+        Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByItemId(itemId, page);
         return ResponseEntity.ok(reviewPage);
     }
 
+    /*
     @GetMapping("/{itemId}/reviews/high-score")
     public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByItemIdAndHighScore(@RequestParam(value = "page", defaultValue = "1") int page, @PathVariable Long itemId) {
         Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByItemIdAndHighScore(page);
@@ -77,5 +80,6 @@ public class ReviewController {
         Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByUserIdAndLowScore(page);
         return ResponseEntity.ok(reviewPage);
     }
+     */
 }
 
