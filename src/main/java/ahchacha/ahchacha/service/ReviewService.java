@@ -7,6 +7,7 @@ import ahchacha.ahchacha.dto.ReviewDto;
 import ahchacha.ahchacha.repository.ItemRepository;
 import ahchacha.ahchacha.repository.ReviewRepository;
 import ahchacha.ahchacha.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
@@ -65,6 +66,27 @@ public class ReviewService {
         return ReviewDto.toDtoPage(reviewPage);
     }
 
+    public Page<ReviewDto.ReviewResponseDto> getReviewsByItemIdHighScore(Long id, int page) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("createdAt"));
+        sorts.add(Sort.Order.desc("reviewScore"));
+
+        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
+        Page<ItemReview> reviewPage = reviewRepository.findByItemId(id, pageable);
+
+        return ReviewDto.toDtoPage(reviewPage);
+    }
+    public Page<ReviewDto.ReviewResponseDto> getReviewsByItemIdLowScore(Long id, int page) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.asc("createdAt"));
+        sorts.add(Sort.Order.desc("reviewScore"));
+
+        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
+        Page<ItemReview> reviewPage = reviewRepository.findByItemId(id, pageable);
+
+        return ReviewDto.toDtoPage(reviewPage);
+    }
+
     public Page<ReviewDto.ReviewResponseDto> getReviewsByUserId(Long id, int page) {
         List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(Sort.Order.desc("createdAt"));
@@ -74,6 +96,36 @@ public class ReviewService {
 
         return ReviewDto.toDtoPage(reviewPage);
     }
+
+    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserIdHighScore(Long id, int page) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("createdAt"));
+        sorts.add(Sort.Order.desc("reviewScore"));
+
+        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
+        Page<ItemReview> reviewPage = reviewRepository.findByUserId(id, pageable);
+
+        return ReviewDto.toDtoPage(reviewPage);
+    }
+    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserIdLowScore(Long id, int page) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.asc("createdAt"));
+        sorts.add(Sort.Order.desc("reviewScore"));
+
+        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
+        Page<ItemReview> reviewPage = reviewRepository.findByUserId(id, pageable);
+
+        return ReviewDto.toDtoPage(reviewPage);
+    }
+
+    @Transactional
+    public void deleteReview(Long reviewId) {
+        ItemReview review = reviewRepository.findById(reviewId).orElseThrow(() ->
+                new IllegalArgumentException("Invalid review Id:"));
+
+        reviewRepository.delete(review);
+    }
+
 
     /*public Page<ReviewDto.ReviewResponseDto> getReviewsByItemIdAndHighScore(int page) {
         List<Sort.Order> sorts = new ArrayList<>();

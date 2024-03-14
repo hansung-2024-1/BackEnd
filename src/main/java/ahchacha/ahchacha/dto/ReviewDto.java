@@ -40,7 +40,7 @@ public class ReviewDto {
 
         public static ReviewResponseDto toDto(ItemReview itemReview) {
             return ReviewResponseDto.builder()
-                    .userId(itemReview.getId())
+                    .reviewId(itemReview.getId())
                     .itemId(itemReview.getItem().getId())
                     .userId(itemReview.getUser().getId())
                     .reviewComment(itemReview.getReviewComment())
