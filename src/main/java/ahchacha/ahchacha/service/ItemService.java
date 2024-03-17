@@ -1,34 +1,56 @@
 package ahchacha.ahchacha.service;
 
+import ahchacha.ahchacha.aws.AmazonS3Manager;
 import ahchacha.ahchacha.domain.Item;
 import ahchacha.ahchacha.domain.User;
+import ahchacha.ahchacha.domain.Uuid;
 import ahchacha.ahchacha.domain.common.enums.Category;
 import ahchacha.ahchacha.dto.ItemDto;
 import ahchacha.ahchacha.repository.ItemRepository;
 import ahchacha.ahchacha.repository.UserRepository;
+import ahchacha.ahchacha.repository.UuidRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.*;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
+@AllArgsConstructor
 @Service
 public class ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final UuidRepository uuidRepository;
+    private final AmazonS3Manager s3Manager;
 
-    @Autowired
-    public ItemService(ItemRepository itemRepository, UserRepository userRepository) {
-        this.itemRepository = itemRepository;
-        this.userRepository = userRepository;
-    }
-
-    public Item save(Long userId, ItemDto.ItemRequestDto itemDto) {
+    @Transactional
+    public ItemDto.ItemResponseDto save(ItemDto.ItemRequestDto itemDto,
+                                        List<MultipartFile> files,
+                                        Long userId) {
         User user = userRepository.findById(userId) //학번
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + userId));
+
+        //이미지 업로드
+        List<String> pictureUrls = new ArrayList<>(); // 이미지 URL들을 저장할 리스트
+        if (files != null && !files.isEmpty()){
+            for (MultipartFile file : files) {
+                String uuid = UUID.randomUUID().toString();
+                Uuid savedUuid = uuidRepository.save(Uuid.builder()
+                        .uuid(uuid).build());
+                String pictureUrl = s3Manager.uploadFile(s3Manager.generateItemKeyName(savedUuid), file);
+                pictureUrls.add(pictureUrl); // 리스트에 이미지 URL 추가
+
+                System.out.println("s3 url(클릭 시 브라우저에 사진 뜨는지 확인): " + pictureUrl);
+            }
+        }
+
         Item item = Item.builder()
                 .user(user)
                 .title(itemDto.getTitle())
@@ -40,13 +62,14 @@ public class ItemService {
                 .returnPlace(itemDto.getReturnPlace())
 //                .personOrOfficial(itemDto.getPersonOrOfficial())
                 .reservation(itemDto.getReservation())
-                .imageUrls(itemDto.getImageUrls())
+                .imageUrls(pictureUrls)
                 .category(itemDto.getCategory())
                 .build();
 
         item.setFirstPrice(itemDto.getPricePerHour());
 
-        return itemRepository.save(item);
+        Item createdItem = itemRepository.save(item);
+        return ItemDto.ItemResponseDto.toDto(createdItem);
     }
 
     public Optional<ItemDto.ItemResponseDto> getItemById(Long id) {

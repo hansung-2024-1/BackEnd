@@ -2,6 +2,7 @@ package ahchacha.ahchacha.controller;
 
 import ahchacha.ahchacha.domain.Item;
 import ahchacha.ahchacha.domain.common.enums.Category;
+import ahchacha.ahchacha.domain.common.enums.Reservation;
 import ahchacha.ahchacha.dto.ItemDto;
 import ahchacha.ahchacha.service.ItemService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,9 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,11 +29,32 @@ public class ItemController {
         this.itemService = itemService;
     }
 
-    @Operation(summary = "아이템 등록")
-    @PostMapping
-    public ResponseEntity<ItemDto.ItemResponseDto> create(@RequestBody ItemDto.ItemRequestDto itemRequestDto) {
-        Item item = itemService.save(itemRequestDto.getUserId(), itemRequestDto);
-        ItemDto.ItemResponseDto itemResponseDto = ItemDto.ItemResponseDto.toDto(item);
+    @Operation(summary = "아이템 등록", description = "canBorrowDateTime/returnDateTime 예시 : 2024-03-17T10:26:08")
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<ItemDto.ItemResponseDto> create(@RequestPart(value = "file", required = false) List<MultipartFile> files,
+                                                          @RequestParam(name = "user") Long userId,
+                                                          @RequestParam(name = "title") String title,
+                                                          @RequestParam(name = "pricePerHour") int pricePerHour,
+                                                          @RequestParam(name = "canBorrowDateTime") LocalDateTime canBorrowDateTime,
+                                                          @RequestParam(name = "returnDateTime") LocalDateTime returnDateTime,
+                                                          @RequestParam(name = "borrowPlace") String borrowPlace,
+                                                          @RequestParam(name = "returnPlace") String returnPlace,
+                                                          @RequestParam(name = "reservation") Reservation reservation,
+                                                          @RequestParam(name = "category") Category category){
+
+        ItemDto.ItemRequestDto itemRequestDto = ItemDto.ItemRequestDto.builder()
+                .userId(userId)
+                .title(title)
+                .pricePerHour(pricePerHour)
+                .canBorrowDateTime(canBorrowDateTime)
+                .returnDateTime(returnDateTime)
+                .borrowPlace(borrowPlace)
+                .returnPlace(returnPlace)
+                .reservation(reservation)
+                .category(category)
+                .build();
+
+        ItemDto.ItemResponseDto itemResponseDto = itemService.save(itemRequestDto, files, itemRequestDto.getUserId());
         return new ResponseEntity<>(itemResponseDto, HttpStatus.CREATED);
     }
 

@@ -27,7 +27,6 @@ public class ItemDto {
         private String returnPlace;
 //        private PersonOrOfficial personOrOfficial;
         private Reservation reservation;
-        private List<String> imageUrls;
         private Category category;
     }
 

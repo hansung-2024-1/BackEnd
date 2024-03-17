@@ -34,10 +34,10 @@ public class Item extends BaseEntity {
     @Column(name = "first_price")
     private int firstPrice; //보증금
 
-    @Column(nullable = false)
+    @Column(name = "canBorrowDateTime")
     private LocalDateTime canBorrowDateTime; //대여가능 날짜,시간
 
-    @Column(nullable = false)
+    @Column(name = "returnDateTime")
     private LocalDateTime returnDateTime; // 반납 날짜, 시간
 
     @Column(nullable = false)
