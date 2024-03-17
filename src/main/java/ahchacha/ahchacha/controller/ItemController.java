@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -39,6 +40,13 @@ public class ItemController {
 
         return optionalItemDto.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "viewCount가 높은 순으로 카테고리 10개를 추출")
+    @GetMapping("/categories/top")
+    public ResponseEntity<List<ItemDto.CategoryCountDto>> getTopCategoriesByViewCount() {
+        List<ItemDto.CategoryCountDto> topCategories = itemService.getTopCategoriesByViewCount(10);
+        return ResponseEntity.ok(topCategories);
     }
 
     @Operation(summary = "조회수 많은 순으로 아이템 목록 조회")

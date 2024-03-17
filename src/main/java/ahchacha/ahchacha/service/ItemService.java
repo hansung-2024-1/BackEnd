@@ -126,6 +126,19 @@ public class ItemService {
         return ItemDto.toDtoPage(itemPage);
     }
 
+    public List<ItemDto.CategoryCountDto> getTopCategoriesByViewCount(int count) {
+        List<Object[]> categoryCounts = itemRepository.findTopCategoriesByViewCount(PageRequest.of(0, count));
+
+        List<ItemDto.CategoryCountDto> categoryCountDtos = new ArrayList<>();
+        for (Object[] result : categoryCounts) {
+            Category category = (Category) result[0];
+            Long viewCount = (Long) result[1];
+            categoryCountDtos.add(new ItemDto.CategoryCountDto(category, viewCount.intValue())); // viewCount를 int로 변환하여 저장
+        }
+
+        return categoryCountDtos;
+    }
+
     public void deleteItem(Long itemId) {
         if (!itemRepository.existsById(itemId)) {
             throw new IllegalArgumentException("Invalid item Id: " + itemId);

@@ -71,6 +71,16 @@ public class ItemDto {
                     .build();
         }
     }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CategoryCountDto {
+        private Category category;
+        private int count;
+    }
+
     public static Page<ItemResponseDto> toDtoPage(Page<Item> itemPage) {
         return itemPage.map(ItemResponseDto::toDto);
     }
