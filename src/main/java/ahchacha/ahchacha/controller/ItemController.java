@@ -12,6 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/items")
 public class ItemController {
@@ -28,6 +31,29 @@ public class ItemController {
         Item item = itemService.save(itemRequestDto.getUserId(), itemRequestDto);
         ItemDto.ItemResponseDto itemResponseDto = ItemDto.ItemResponseDto.toDto(item);
         return new ResponseEntity<>(itemResponseDto, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "아이템 상세 조회", description = "{itemId} 자리에 상세 조회할 아이템 id를 전달해주세요.")
+    @GetMapping("/{itemId}")
+    public ResponseEntity<ItemDto.ItemResponseDto> getTalkById(@PathVariable Long itemId) {
+        Optional<ItemDto.ItemResponseDto> optionalItemDto = itemService.getItemById(itemId);
+
+        return optionalItemDto.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "viewCount가 높은 순으로 카테고리 10개를 추출")
+    @GetMapping("/categories/top")
+    public ResponseEntity<List<ItemDto.CategoryCountDto>> getTopCategoriesByViewCount() {
+        List<ItemDto.CategoryCountDto> topCategories = itemService.getTopCategoriesByViewCount(10);
+        return ResponseEntity.ok(topCategories);
+    }
+
+    @Operation(summary = "조회수 많은 순으로 아이템 목록 조회")
+    @GetMapping("/view-counts")
+    public ResponseEntity<Page<ItemDto.ItemResponseDto>> getAllTalksByViewCounts(@RequestParam(value = "page", defaultValue = "1") int page) {
+        Page<ItemDto.ItemResponseDto> itemsDtoPage = itemService.getAllItemsByViewCount(page);
+        return ResponseEntity.ok(itemsDtoPage);
     }
 
     @Operation(summary = "등록된 아이템 최신순 조회")
@@ -68,5 +94,12 @@ public class ItemController {
 
         Page<ItemDto.ItemResponseDto> itemPages = itemService.searchItemByCategory(category, page);
         return ResponseEntity.ok(itemPages);
+    }
+
+    @Operation(summary = "등록한 아이템 삭제", description = "item의 id를 입력하세요")
+    @DeleteMapping("/{itemId}")
+    public ResponseEntity<?> deleteItem(@PathVariable Long itemId) {
+        itemService.deleteItem(itemId);
+        return ResponseEntity.ok().build();
     }
 }

@@ -6,6 +6,7 @@ import ahchacha.ahchacha.domain.common.enums.PersonOrOfficial;
 import ahchacha.ahchacha.domain.common.enums.Reservation;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -26,9 +27,6 @@ public class Item extends BaseEntity {
 
     @Column(nullable = false)
     private String title; //제목
-
-    @Column(nullable = false)
-    private int quantity; //수량
 
     @Column(name = "pricePerHour")
     private int pricePerHour; //대여비
@@ -64,6 +62,11 @@ public class Item extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Category category; //아이템 카테고리
+
+    @Setter
+    @ColumnDefault("0")
+    @Column(name = "view_count")
+    private int viewCount;
 
     public void setFirstPrice(int pricePerHour) {
         this.pricePerHour = pricePerHour;

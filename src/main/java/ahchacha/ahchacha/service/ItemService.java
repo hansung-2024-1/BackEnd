@@ -13,6 +13,7 @@ import org.springframework.data.domain.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ItemService {
@@ -31,7 +32,6 @@ public class ItemService {
         Item item = Item.builder()
                 .user(user)
                 .title(itemDto.getTitle())
-                .quantity(itemDto.getQuantity())
                 .pricePerHour(itemDto.getPricePerHour())
                 .firstPrice(itemDto.getFirstPrice())
                 .canBorrowDateTime(itemDto.getCanBorrowDateTime())
@@ -49,9 +49,32 @@ public class ItemService {
         return itemRepository.save(item);
     }
 
+    public Optional<ItemDto.ItemResponseDto> getItemById(Long id) {
+        Optional<Item> optionalItem = itemRepository.findById(id);
+
+        if (optionalItem.isPresent()) {
+            Item item = optionalItem.get();
+
+            item.setViewCount(item.getViewCount()+1);
+            itemRepository.save(item);
+        }
+
+        return optionalItem.map(ItemDto.ItemResponseDto::toDto);
+    }
+
     public Page<ItemDto.ItemResponseDto> getAllItems(int page) {
         List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(Sort.Order.desc("createdAt")); //최근 작성순
+
+        Pageable pageable = PageRequest.of(page-1, 6, Sort.by(sorts)); //한페이지에 6개
+        Page<Item> itemPage = itemRepository.findAll(pageable);
+        return ItemDto.toDtoPage(itemPage);
+    }
+
+    public Page<ItemDto.ItemResponseDto> getAllItemsByViewCount(int page) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("viewCount"));
+        sorts.add(Sort.Order.desc("createdAt"));  // 조회수가 동일하면 최신순으로 정렬
 
         Pageable pageable = PageRequest.of(page-1, 6, Sort.by(sorts)); //한페이지에 6개
         Page<Item> itemPage = itemRepository.findAll(pageable);
@@ -101,5 +124,25 @@ public class ItemService {
         Page<Item> itemPage = itemRepository.findByCategory(category, pageable);
 
         return ItemDto.toDtoPage(itemPage);
+    }
+
+    public List<ItemDto.CategoryCountDto> getTopCategoriesByViewCount(int count) {
+        List<Object[]> categoryCounts = itemRepository.findTopCategoriesByViewCount(PageRequest.of(0, count));
+
+        List<ItemDto.CategoryCountDto> categoryCountDtos = new ArrayList<>();
+        for (Object[] result : categoryCounts) {
+            Category category = (Category) result[0];
+            Long viewCount = (Long) result[1];
+            categoryCountDtos.add(new ItemDto.CategoryCountDto(category, viewCount.intValue())); // viewCount를 int로 변환하여 저장
+        }
+
+        return categoryCountDtos;
+    }
+
+    public void deleteItem(Long itemId) {
+        if (!itemRepository.existsById(itemId)) {
+            throw new IllegalArgumentException("Invalid item Id: " + itemId);
+        }
+        itemRepository.deleteById(itemId);
     }
 }
