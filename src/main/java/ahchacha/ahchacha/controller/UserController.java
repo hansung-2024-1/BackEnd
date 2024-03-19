@@ -50,10 +50,15 @@ public class UserController {
         try {
             userService.setNickname(nickname, session);
             return ResponseEntity.ok("닉네임이 성공적으로 변경되었습니다.");
+        } catch (IllegalStateException e) {
+            // 여기에서는 사용자 정의 예외 메시지를 반환합니다.
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("닉네임 변경 중 오류가 발생하였습니다.");
+            // 그 외 모든 예외에 대해서는 더 일반적인 오류 메시지를 반환합니다.
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("닉네임 변경 중 예상치 못한 오류가 발생하였습니다.");
         }
     }
+
 
     @Operation(summary = "사용자 타입 변경 person or official")
     @PostMapping("/setUserType")

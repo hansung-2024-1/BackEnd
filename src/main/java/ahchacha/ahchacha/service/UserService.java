@@ -201,6 +201,10 @@ public class UserService {
             throw new IllegalStateException("로그인이 필요합니다.");
         }
 
+        Optional<User> existingUser = userRepository.findByNickname(nickname);
+        if(existingUser.isPresent() && !existingUser.get().getId().equals(user.getId()))
+            throw new IllegalStateException("이미 사용중인 닉네임 입니다.");
+
         // 닉네임 변경
         user.setNickname(nickname);
 
