@@ -21,12 +21,16 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     public User login(UserDto.LoginRequestDto loginRequestDto, HttpSession session) throws IOException {
 
@@ -70,8 +74,15 @@ public class UserService {
         } else {
             // 학번, 1트랙, 2트랙으로 학생 정보 만들기
             user = userRepository.save(getNewStudent(session, stuId));
-            session.setAttribute("user", user);
+
         }
+
+        log.info("Saving user info in session. User ID: {}", user.getId());
+
+        session.setAttribute("user", user);
+
+// 로그인 성공 로그 출력
+        log.info("Login successful. User ID: {}", user.getId());
 
         if (redirectUrl.equals("http://info.hansung.ac.kr/h_dae/dae_main.html") && success) {
             return user;
@@ -180,14 +191,22 @@ public class UserService {
         return "logout success";
     }
 
-    public void setNickname(String nickname, HttpSession session){
-
+    public void setNickname(String nickname, HttpSession session) {
         // 세션에서 사용자 정보를 가져옴
         User user = (User) session.getAttribute("user");
-        if(user != null){
-            user.setNickname(nickname);
-            userRepository.save(user);
+        if (user == null) {
+            // 사용자가 로그인하지 않았을 경우 에러 처리
+            throw new IllegalStateException("로그인이 필요합니다.");
         }
+
+        // 닉네임 변경
+        user.setNickname(nickname);
+
+        // 변경된 사용자 정보를 데이터베이스에 저장
+        userRepository.save(user);
     }
+
+
+
 
 }
