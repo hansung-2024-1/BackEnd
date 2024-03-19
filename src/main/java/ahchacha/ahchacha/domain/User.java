@@ -1,5 +1,6 @@
 package ahchacha.ahchacha.domain;
 
+import ahchacha.ahchacha.domain.common.enums.PersonOrOfficial;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
@@ -27,6 +28,9 @@ public class User {
     private String track1;
 
     private String track2;
+
+    @Enumerated(EnumType.STRING)
+    private PersonOrOfficial personOrOfficial; //공공 로그인 or 개인 로그인
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item> items = new ArrayList<>();

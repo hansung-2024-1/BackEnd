@@ -2,6 +2,7 @@ package ahchacha.ahchacha.service;
 
 
 import ahchacha.ahchacha.domain.User;
+import ahchacha.ahchacha.domain.common.enums.PersonOrOfficial;
 import ahchacha.ahchacha.dto.UserDto;
 import ahchacha.ahchacha.repository.UserRepository;
 import ahchacha.ahchacha.service.common.ConnectionResponse;
@@ -163,6 +164,7 @@ public class UserService {
         return User.builder()
                 .id(stuId)
                 .name(name)
+                .personOrOfficial(PersonOrOfficial.PERSON)
                 .track1(track1)
                 .track2(track2)
                 .build();
@@ -205,6 +207,19 @@ public class UserService {
         // 변경된 사용자 정보를 데이터베이스에 저장
         userRepository.save(user);
     }
+
+    public void setUserType(PersonOrOfficial userType, HttpSession session)
+    {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            throw new IllegalStateException("로그인이 필요합니다.");
+        }
+
+        user.setPersonOrOfficial(userType);
+        userRepository.save(user);
+    }
+
+
 
 
 

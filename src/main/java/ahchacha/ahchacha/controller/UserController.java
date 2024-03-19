@@ -1,6 +1,7 @@
 package ahchacha.ahchacha.controller;
 
 import ahchacha.ahchacha.domain.User;
+import ahchacha.ahchacha.domain.common.enums.PersonOrOfficial;
 import ahchacha.ahchacha.dto.UserDto;
 import ahchacha.ahchacha.repository.UserRepository;
 import ahchacha.ahchacha.service.UserService;
@@ -51,6 +52,17 @@ public class UserController {
             return ResponseEntity.ok("닉네임이 성공적으로 변경되었습니다.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("닉네임 변경 중 오류가 발생하였습니다.");
+        }
+    }
+
+    @Operation(summary = "사용자 타입 변경 person or official")
+    @PostMapping("/setUserType")
+    public String setUserType(@RequestParam("userType") PersonOrOfficial userType, HttpSession session) {
+        try {
+            userService.setUserType(userType, session);
+            return "사용자 타입이 성공적으로 업데이트 되었습니다.";
+        } catch (IllegalStateException e) {
+            return e.getMessage();
         }
     }
 
