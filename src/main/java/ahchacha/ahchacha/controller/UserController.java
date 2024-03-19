@@ -42,6 +42,7 @@ public class UserController {
         }
     }
 
+
     @Operation(summary = "닉네임 설정")
     @PostMapping("/nickname")
     public ResponseEntity<String> setNickname(@RequestParam String nickname, HttpSession session) {
