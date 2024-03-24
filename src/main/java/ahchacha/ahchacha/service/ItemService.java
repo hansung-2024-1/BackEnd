@@ -27,7 +27,6 @@ import java.util.UUID;
 @Service
 public class ItemService {
     private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
     private final UuidRepository uuidRepository;
     private final AmazonS3Manager s3Manager;
 
@@ -116,7 +115,7 @@ public class ItemService {
 
     public Page<ItemDto.ItemResponseDto> getAllItemsByPersonOrOfficial(int page) {
         List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.asc("personOrOfficial")); // 예약가능여부와 같은 논리
+        sorts.add(Sort.Order.desc("personOrOfficial"));
         sorts.add(Sort.Order.desc("createdAt"));
 
         Pageable pageable = PageRequest.of(page-1, 6, Sort.by(sorts));
@@ -162,10 +161,15 @@ public class ItemService {
         return categoryCountDtos;
     }
 
-    public void deleteItem(Long itemId) {
-        if (!itemRepository.existsById(itemId)) {
-            throw new IllegalArgumentException("Invalid item Id: " + itemId);
+    public void deleteItem(Long itemId, User currentUser) {
+        Item item = itemRepository.findById(itemId).orElseThrow(()
+                -> new IllegalArgumentException("Invalid item Id: " + itemId));
+
+        // 아이템의 userId와 현재 세션의 userId가 같은지 확인
+        if (!item.getUser().getId().equals(currentUser.getId())) {
+            throw new IllegalArgumentException("You do not have permission to delete this item.");
         }
+
         itemRepository.deleteById(itemId);
     }
 }
