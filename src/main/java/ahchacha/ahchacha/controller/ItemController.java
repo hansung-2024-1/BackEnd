@@ -1,11 +1,13 @@
 package ahchacha.ahchacha.controller;
 
 import ahchacha.ahchacha.domain.Item;
+import ahchacha.ahchacha.domain.User;
 import ahchacha.ahchacha.domain.common.enums.Category;
 import ahchacha.ahchacha.domain.common.enums.Reservation;
 import ahchacha.ahchacha.dto.ItemDto;
 import ahchacha.ahchacha.service.ItemService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -121,10 +123,11 @@ public class ItemController {
         return ResponseEntity.ok(itemPages);
     }
 
-    @Operation(summary = "등록한 아이템 삭제", description = "item의 id를 입력하세요")
+    @Operation(summary = "등록한 아이템 삭제", description = "item의 id를 입력하세요, 로그인 한 사용자의 물품이 아니면 삭제가 되지않습니다.")
     @DeleteMapping("/{itemId}")
-    public ResponseEntity<?> deleteItem(@PathVariable Long itemId) {
-        itemService.deleteItem(itemId);
+    public ResponseEntity<?> deleteItem(@PathVariable Long itemId, HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute("user");
+        itemService.deleteItem(itemId, user);
         return ResponseEntity.ok().build();
     }
 }
