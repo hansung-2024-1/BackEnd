@@ -9,6 +9,7 @@ import ahchacha.ahchacha.dto.ItemDto;
 import ahchacha.ahchacha.repository.ItemRepository;
 import ahchacha.ahchacha.repository.UserRepository;
 import ahchacha.ahchacha.repository.UuidRepository;
+import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -31,11 +32,10 @@ public class ItemService {
     private final AmazonS3Manager s3Manager;
 
     @Transactional
-    public ItemDto.ItemResponseDto save(ItemDto.ItemRequestDto itemDto,
+    public ItemDto.ItemResponseDto createItem(ItemDto.ItemRequestDto itemDto,
                                         List<MultipartFile> files,
-                                        Long userId) {
-        User user = userRepository.findById(userId) //학번
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + userId));
+                                        HttpSession session) {
+        User user = (User) session.getAttribute("user");
 
         //이미지 업로드
         List<String> pictureUrls = new ArrayList<>(); // 이미지 URL들을 저장할 리스트
@@ -60,10 +60,10 @@ public class ItemService {
                 .returnDateTime(itemDto.getReturnDateTime())
                 .borrowPlace(itemDto.getBorrowPlace())
                 .returnPlace(itemDto.getReturnPlace())
-//                .personOrOfficial(itemDto.getPersonOrOfficial())
                 .reservation(itemDto.getReservation())
                 .imageUrls(pictureUrls)
                 .category(itemDto.getCategory())
+                .personOrOfficial(user.getPersonOrOfficial())
                 .build();
 
         item.setFirstPrice(itemDto.getPricePerHour());

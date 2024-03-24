@@ -17,7 +17,6 @@ public class ItemDto {
     @Setter
     @Builder
     public static class ItemRequestDto {
-        private Long userId;
         private String title;
         private int pricePerHour;
         private int firstPrice;
@@ -25,7 +24,6 @@ public class ItemDto {
         private LocalDateTime returnDateTime;
         private String borrowPlace;
         private String returnPlace;
-//        private PersonOrOfficial personOrOfficial;
         private Reservation reservation;
         private Category category;
     }
@@ -42,7 +40,6 @@ public class ItemDto {
         private LocalDateTime returnDateTime;
         private String borrowPlace;
         private String returnPlace;
-//        private PersonOrOfficial personOrOfficial;
         private Reservation reservation;
         private List<String> imageUrls;
         private Category category;
@@ -60,7 +57,6 @@ public class ItemDto {
                     .returnDateTime(item.getReturnDateTime())
                     .borrowPlace(item.getBorrowPlace())
                     .returnPlace(item.getReturnPlace())
-//                    .personOrOfficial(item.getPersonOrOfficial())
                     .reservation(item.getReservation())
                     .imageUrls(item.getImageUrls())
                     .category(item.getCategory())

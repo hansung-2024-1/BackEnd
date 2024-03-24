@@ -46,10 +46,6 @@ public class Item extends BaseEntity {
     @Column(nullable = false)
     private String returnPlace; //반납 장소
 
-//    @Enumerated(EnumType.STRING)
-//    @Column(columnDefinition = "VARCHAR(10) DEFAULT 'PERSON'")
-//    private PersonOrOfficial personOrOfficial; // 개인 OR 학생회
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Reservation reservation; // 예약 가능, 불가
@@ -67,6 +63,9 @@ public class Item extends BaseEntity {
     @ColumnDefault("0")
     @Column(name = "view_count")
     private int viewCount;
+
+    @Enumerated(EnumType.STRING)
+    private PersonOrOfficial personOrOfficial;
 
     public void setFirstPrice(int pricePerHour) {
         this.pricePerHour = pricePerHour;
