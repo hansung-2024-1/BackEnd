@@ -1,6 +1,7 @@
 package ahchacha.ahchacha.dto;
 
 import ahchacha.ahchacha.domain.Item;
+import ahchacha.ahchacha.domain.User;
 import ahchacha.ahchacha.domain.common.enums.Category;
 import ahchacha.ahchacha.domain.common.enums.PersonOrOfficial;
 import ahchacha.ahchacha.domain.common.enums.Reservation;
@@ -32,6 +33,7 @@ public class ItemDto {
     @Setter
     @Builder
     public static class ItemResponseDto {
+        private Long userId;
         private Long id;
         private String title;
         private int pricePerHour;
@@ -44,11 +46,13 @@ public class ItemDto {
         private List<String> imageUrls;
         private Category category;
         private int viewCount;
+        private PersonOrOfficial personOrOfficial;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
 
         public static ItemResponseDto toDto(Item item) {
             return ItemResponseDto.builder()
+                    .userId(item.getUser().getId())
                     .id(item.getId())
                     .title(item.getTitle())
                     .pricePerHour(item.getPricePerHour())
@@ -61,6 +65,7 @@ public class ItemDto {
                     .imageUrls(item.getImageUrls())
                     .category(item.getCategory())
                     .viewCount(item.getViewCount())
+                    .personOrOfficial(item.getPersonOrOfficial())
                     .createdAt(item.getCreatedAt())
                     .updatedAt(item.getUpdatedAt())
                     .build();
