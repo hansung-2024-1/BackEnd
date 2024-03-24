@@ -52,7 +52,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
     "android.gradle.sync.needed": "true",
-    "git-widget-placeholder": "ci",
+    "git-widget-placeholder": "ci1",
     "last_opened_file_path": "C:/Users/donguk/Desktop/BackEnd",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -103,5 +103,9 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="[FIX] .gitgnore 파일 수정(application.yml 못올라가게 변경)" />
+    <option name="LAST_COMMIT_MESSAGE" value="[FIX] .gitgnore 파일 수정(application.yml 못올라가게 변경)" />
   </component>
 </project>

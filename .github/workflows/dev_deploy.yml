@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest # (3).OS환경
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'develop' //develop 브랜치에서 merge가 되었으면 동작해라
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'ci1' //develop 브랜치에서 merge가 되었으면 동작해라
 
     steps:
       - name: Checkout #코드를 가져오는것 이름은 정형화된것이 아니라 마음대로 지어도됨
