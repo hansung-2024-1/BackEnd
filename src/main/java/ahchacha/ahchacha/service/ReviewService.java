@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -99,6 +100,13 @@ public class ReviewService {
         return ReviewDto.toDtoPage(reviewPage);
     }
 
+    public BigDecimal getAverageScoreByUserIdAndPersonType(Long userId, PersonType personType) {
+        return reviewRepository.findAverageScoreByUserIdAndPersonType(userId, personType);
+    }
+
+    public BigDecimal getOverallAverageScoreByUserId(Long userId) {
+        return reviewRepository.findAverageScoreByUserId(userId);
+    }
 
     @Transactional
     public void deleteReview(Long reviewId, User currentUser) {

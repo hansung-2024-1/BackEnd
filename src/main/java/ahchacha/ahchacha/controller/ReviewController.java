@@ -2,6 +2,7 @@ package ahchacha.ahchacha.controller;
 
 import ahchacha.ahchacha.domain.Review;
 import ahchacha.ahchacha.domain.User;
+import ahchacha.ahchacha.domain.common.enums.PersonType;
 import ahchacha.ahchacha.dto.ReviewDto;
 import ahchacha.ahchacha.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/review")
@@ -77,6 +80,21 @@ public class ReviewController {
             @RequestParam(value = "page", defaultValue = "1") int page) {
         Page<ReviewDto.ReviewResponseDto> reviews = reviewService.getReviewsByUserIdAndPersonTypeRECEIVER(userId, page);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
+    }
+
+    @GetMapping("/{userId}/average/{personType}")
+    public ResponseEntity<BigDecimal> getAverageScoreByPersonType(
+            @PathVariable Long userId,
+            @PathVariable PersonType personType) {
+        BigDecimal averageScore = reviewService.getAverageScoreByUserIdAndPersonType(userId, personType);
+        return ResponseEntity.ok(averageScore);
+    }
+
+    @GetMapping("/{userId}/average")
+    public ResponseEntity<BigDecimal> getOverallAverageScore(
+            @PathVariable Long userId) {
+        BigDecimal overallAverageScore = reviewService.getOverallAverageScoreByUserId(userId);
+        return ResponseEntity.ok(overallAverageScore);
     }
 
     @Operation(summary = "리뷰 삭제", description = "review id를 입력하세요, 로그인 한 사용자의 리뷰가 아니면 삭제가 되지않습니다.")
