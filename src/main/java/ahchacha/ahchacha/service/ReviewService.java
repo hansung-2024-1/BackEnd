@@ -49,7 +49,7 @@ public class ReviewService {
         List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(Sort.Order.desc("createdAt"));
 
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
+        Pageable pageable = PageRequest.of(page - 1, 3, Sort.by(sorts));
         Page<Review> reviewPage = reviewRepository.findByPersonType(PersonType.RENTER, pageable);
 
         return ReviewDto.toDtoPage(reviewPage);
@@ -59,7 +59,7 @@ public class ReviewService {
         List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(Sort.Order.desc("createdAt"));
 
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
+        Pageable pageable = PageRequest.of(page - 1, 3, Sort.by(sorts));
         Page<Review> reviewPage = reviewRepository.findByPersonType(PersonType.RECEIVER, pageable);
 
         return ReviewDto.toDtoPage(reviewPage);
@@ -76,6 +76,26 @@ public class ReviewService {
 
         Pageable pageable = PageRequest.of(page-1, 2, Sort.by(sorts));
         Page<Review> reviewPage = reviewRepository.findByUserIdAndPersonType(userId, PersonType.RENTER, pageable);
+        return ReviewDto.toDtoPage(reviewPage);
+    }
+
+    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserIdAndPersonTypeRENTER(Long userId, int page) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("reviewScore"));
+        sorts.add(Sort.Order.desc("createdAt"));
+
+        Pageable pageable = PageRequest.of(page-1, 3, Sort.by(sorts));
+        Page<Review> reviewPage = reviewRepository.findByUserIdAndPersonType(userId, PersonType.RENTER, pageable);
+        return ReviewDto.toDtoPage(reviewPage);
+    }
+
+    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserIdAndPersonTypeRECEIVER(Long userId, int page) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("reviewScore"));
+        sorts.add(Sort.Order.desc("createdAt"));
+
+        Pageable pageable = PageRequest.of(page-1, 3, Sort.by(sorts));
+        Page<Review> reviewPage = reviewRepository.findByUserIdAndPersonType(userId, PersonType.RECEIVER, pageable);
         return ReviewDto.toDtoPage(reviewPage);
     }
 

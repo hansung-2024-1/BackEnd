@@ -52,11 +52,30 @@ public class ReviewController {
         return ResponseEntity.ok(review);
     }
 
+    @Operation(summary = "유저 아이디로 별점 높은순 2개 조회", description = "{userId} 자리에 userId를 전달해주세요.")
     @GetMapping("/{userId}/renter_shortView") //피그마 대여물건상세페이지 유저 밑에 2개 리뷰에 쓰기
-    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getRenterReviewsByUserId(
+    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByUserIdAndPersonTypeRENTERShortView(
             @PathVariable Long userId,
             @RequestParam(value = "page", defaultValue = "1") int page) {
         Page<ReviewDto.ReviewResponseDto> reviews = reviewService.getReviewsByUserIdAndPersonTypeRENTERShortView(userId, page);
+        return new ResponseEntity<>(reviews, HttpStatus.OK);
+    }
+
+    @Operation(summary = "유저 아이디로 RENTER 별점 높은순 조회", description = "{userId} 자리에 userId를 전달해주세요.")
+    @GetMapping("/{userId}/renter_RENTER")
+    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByUserIdAndPersonTypeRENTER(
+            @PathVariable Long userId,
+            @RequestParam(value = "page", defaultValue = "1") int page) {
+        Page<ReviewDto.ReviewResponseDto> reviews = reviewService.getReviewsByUserIdAndPersonTypeRENTER(userId, page);
+        return new ResponseEntity<>(reviews, HttpStatus.OK);
+    }
+
+    @Operation(summary = "유저 아이디로 RECEIVER 별점 높은순 조회", description = "{userId} 자리에 userId를 전달해주세요.")
+    @GetMapping("/{userId}/renter_RECEIVER")
+    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByUserIdAndPersonTypeRECEIVER(
+            @PathVariable Long userId,
+            @RequestParam(value = "page", defaultValue = "1") int page) {
+        Page<ReviewDto.ReviewResponseDto> reviews = reviewService.getReviewsByUserIdAndPersonTypeRECEIVER(userId, page);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
 
