@@ -8,6 +8,7 @@ import ahchacha.ahchacha.dto.ReviewDto;
 import ahchacha.ahchacha.repository.ItemRepository;
 import ahchacha.ahchacha.repository.ReviewRepository;
 import ahchacha.ahchacha.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -63,67 +64,63 @@ public class ReviewService {
         return ReviewDto.toDtoPage(reviewPage);
     }
 
-    public Page<ReviewDto.ReviewResponseDto> getReviewsByItemId(Long id, int page) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.desc("createdAt"));
-
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<Review> reviewPage = reviewRepository.findByItemId(id, pageable);
-
-        return ReviewDto.toDtoPage(reviewPage);
+    public ReviewDto.ReviewResponseDto getReviewByItemId(Long itemId) {
+        Review review = reviewRepository.findByItemId(itemId).orElseThrow(() -> new EntityNotFoundException("Review not found for item: " + itemId));
+        return ReviewDto.ReviewResponseDto.toDto(review);
     }
 
-    public Page<ReviewDto.ReviewResponseDto> getReviewsByItemIdHighScore(Long id, int page) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.desc("createdAt"));
-        sorts.add(Sort.Order.desc("reviewScore"));
 
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<Review> reviewPage = reviewRepository.findByItemId(id, pageable);
+//    public Page<ReviewDto.ReviewResponseDto> getReviewsByItemIdHighScore(Long id, int page) {
+//        List<Sort.Order> sorts = new ArrayList<>();
+//        sorts.add(Sort.Order.desc("createdAt"));
+//        sorts.add(Sort.Order.desc("reviewScore"));
+//
+//        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
+//        Page<Review> reviewPage = reviewRepository.findByItemId(id, pageable);
+//
+//        return ReviewDto.toDtoPage(reviewPage);
+//    }
+//    public Page<ReviewDto.ReviewResponseDto> getReviewsByItemIdLowScore(Long id, int page) {
+//        List<Sort.Order> sorts = new ArrayList<>();
+//        sorts.add(Sort.Order.asc("createdAt"));
+//        sorts.add(Sort.Order.desc("reviewScore"));
+//
+//        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
+//        Page<Review> reviewPage = reviewRepository.findByItemId(id, pageable);
+//
+//        return ReviewDto.toDtoPage(reviewPage);
+//    }
 
-        return ReviewDto.toDtoPage(reviewPage);
-    }
-    public Page<ReviewDto.ReviewResponseDto> getReviewsByItemIdLowScore(Long id, int page) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.asc("createdAt"));
-        sorts.add(Sort.Order.desc("reviewScore"));
-
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<Review> reviewPage = reviewRepository.findByItemId(id, pageable);
-
-        return ReviewDto.toDtoPage(reviewPage);
-    }
-
-    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserId(Long id, int page) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.desc("createdAt"));
-
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<Review> reviewPage = reviewRepository.findByUserId(id, pageable);
-
-        return ReviewDto.toDtoPage(reviewPage);
-    }
-
-    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserIdHighScore(Long id, int page) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.desc("createdAt"));
-        sorts.add(Sort.Order.desc("reviewScore"));
-
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<Review> reviewPage = reviewRepository.findByUserId(id, pageable);
-
-        return ReviewDto.toDtoPage(reviewPage);
-    }
-    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserIdLowScore(Long id, int page) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.asc("createdAt"));
-        sorts.add(Sort.Order.desc("reviewScore"));
-
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<Review> reviewPage = reviewRepository.findByUserId(id, pageable);
-
-        return ReviewDto.toDtoPage(reviewPage);
-    }
+//    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserId(Long id, int page) {
+//        List<Sort.Order> sorts = new ArrayList<>();
+//        sorts.add(Sort.Order.desc("createdAt"));
+//
+//        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
+//        Page<Review> reviewPage = reviewRepository.findByUserId(id, pageable);
+//
+//        return ReviewDto.toDtoPage(reviewPage);
+//    }
+//
+//    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserIdHighScore(Long id, int page) {
+//        List<Sort.Order> sorts = new ArrayList<>();
+//        sorts.add(Sort.Order.desc("createdAt"));
+//        sorts.add(Sort.Order.desc("reviewScore"));
+//
+//        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
+//        Page<Review> reviewPage = reviewRepository.findByUserId(id, pageable);
+//
+//        return ReviewDto.toDtoPage(reviewPage);
+//    }
+//    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserIdLowScore(Long id, int page) {
+//        List<Sort.Order> sorts = new ArrayList<>();
+//        sorts.add(Sort.Order.asc("createdAt"));
+//        sorts.add(Sort.Order.desc("reviewScore"));
+//
+//        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
+//        Page<Review> reviewPage = reviewRepository.findByUserId(id, pageable);
+//
+//        return ReviewDto.toDtoPage(reviewPage);
+//    }
 
     @Transactional
     public void deleteReview(Long reviewId) {
@@ -132,49 +129,4 @@ public class ReviewService {
 
         reviewRepository.delete(review);
     }
-
-
-    /*public Page<ReviewDto.ReviewResponseDto> getReviewsByItemIdAndHighScore(int page) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.desc("score"));
-        sorts.add(Sort.Order.desc("createdAt"));
-
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<ItemReview> reviewPage = reviewRepository.findByItemIdAndHighScore(pageable);
-
-        return ReviewDto.toDtoPage(reviewPage);
-    }
-
-    public Page<ReviewDto.ReviewResponseDto> getReviewsByItemIdAndLowScore(int page) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.asc("score"));
-        sorts.add(Sort.Order.desc("createdAt"));
-
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<ItemReview> reviewPage = reviewRepository.findByItemIdAndLowScore(pageable);
-
-        return ReviewDto.toDtoPage(reviewPage);
-    }
-
-    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserIdAndHighScore(int page) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.desc("score"));
-        sorts.add(Sort.Order.desc("createdAt"));
-
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<ItemReview> reviewPage = reviewRepository.findByUserIdAndHighScore(pageable);
-
-        return ReviewDto.toDtoPage(reviewPage);
-    }
-
-    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserIdAndLowScore(int page) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.desc("score"));
-        sorts.add(Sort.Order.desc("createdAt"));
-
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<ItemReview> reviewPage = reviewRepository.findByUserIdAndLowScore(pageable);
-
-        return ReviewDto.toDtoPage(reviewPage);
-    }*/
 }
