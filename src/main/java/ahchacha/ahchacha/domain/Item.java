@@ -11,7 +11,6 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -79,6 +78,6 @@ public class Item extends BaseEntity {
     private User user;
 
     @OneToOne(mappedBy = "item", cascade = CascadeType.ALL)
-    private ItemReview itemReview;
+    private Review review;
 
 }
