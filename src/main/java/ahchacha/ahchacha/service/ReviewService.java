@@ -4,6 +4,7 @@ import ahchacha.ahchacha.domain.Item;
 import ahchacha.ahchacha.domain.Review;
 import ahchacha.ahchacha.domain.User;
 import ahchacha.ahchacha.domain.common.enums.PersonType;
+import ahchacha.ahchacha.dto.ItemDto;
 import ahchacha.ahchacha.dto.ReviewDto;
 import ahchacha.ahchacha.repository.ItemRepository;
 import ahchacha.ahchacha.repository.ReviewRepository;
@@ -67,6 +68,15 @@ public class ReviewService {
     public ReviewDto.ReviewResponseDto getReviewByItemId(Long itemId) {
         Review review = reviewRepository.findByItemId(itemId).orElseThrow(() -> new EntityNotFoundException("Review not found for item: " + itemId));
         return ReviewDto.ReviewResponseDto.toDto(review);
+    }
+
+    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserIdAndPersonTypeRENTERShortView(Long userId, int page) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("reviewScore"));
+
+        Pageable pageable = PageRequest.of(page-1, 2, Sort.by(sorts));
+        Page<Review> reviewPage = reviewRepository.findByUserIdAndPersonType(userId, PersonType.RENTER, pageable);
+        return ReviewDto.toDtoPage(reviewPage);
     }
 
 

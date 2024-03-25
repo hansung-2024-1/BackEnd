@@ -52,7 +52,13 @@ public class ReviewController {
         return ResponseEntity.ok(review);
     }
 
-
+    @GetMapping("/{userId}/renter_shortView") //피그마 대여물건상세페이지 유저 밑에 2개 리뷰에 쓰기
+    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getRenterReviewsByUserId(
+            @PathVariable Long userId,
+            @RequestParam(value = "page", defaultValue = "1") int page) {
+        Page<ReviewDto.ReviewResponseDto> reviews = reviewService.getReviewsByUserIdAndPersonTypeRENTERShortView(userId, page);
+        return new ResponseEntity<>(reviews, HttpStatus.OK);
+    }
 
     @Operation(summary = "리뷰 삭제", description = "review id를 입력하세요, 로그인 한 사용자의 리뷰가 아니면 삭제가 되지않습니다.")
     @DeleteMapping("{reviewId}")
