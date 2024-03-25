@@ -1,9 +1,11 @@
 package ahchacha.ahchacha.controller;
 
 import ahchacha.ahchacha.domain.Review;
+import ahchacha.ahchacha.domain.User;
 import ahchacha.ahchacha.dto.ReviewDto;
 import ahchacha.ahchacha.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,14 +31,14 @@ public class ReviewController {
         return new ResponseEntity<>(reviewResponseDto, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "리뷰 목록 조회 RENTER")
+    @Operation(summary = "리뷰 최신 목록 조회 RENTER")
     @GetMapping("/list-renter")
     public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getAllReviewsRENTER(@RequestParam(value = "page", defaultValue = "1") int page) {
         Page<ReviewDto.ReviewResponseDto> reviewsResponseDto = reviewService.getAllReviewsRENTER(page);
         return new ResponseEntity<>(reviewsResponseDto, HttpStatus.OK);
     }
 
-    @Operation(summary = "리뷰 목록 조회 RECEIVER")
+    @Operation(summary = "리뷰 최신 목록 조회 RECEIVER")
     @GetMapping("/list-receiver")
     public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getAllReviewsRECEIVER(@RequestParam(value = "page", defaultValue = "1") int page) {
         Page<ReviewDto.ReviewResponseDto> reviewsResponseDto = reviewService.getAllReviewsRECEIVER(page);
@@ -50,46 +52,14 @@ public class ReviewController {
         return ResponseEntity.ok(review);
     }
 
-//    @Operation(summary="아이템 아이디로 리뷰 조회 평점 높은 순 ")
-//    @GetMapping("/{itemId}/reviews/HighScore")
-//    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByItemIdHighScore(@RequestParam(value = "page", defaultValue = "1") int page, @PathVariable Long itemId) {
-//        Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByItemIdHighScore(itemId, page);
-//        return ResponseEntity.ok(reviewPage);
-//    }
-//
-//    @Operation(summary="아이템 아이디로 리뷰 조회 평점 낮은 순 ")
-//    @GetMapping("/{itemId}/reviews/LowScore")
-//    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByItemIdLowScore(@RequestParam(value = "page", defaultValue = "1") int page, @PathVariable Long itemId) {
-//        Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByItemIdLowScore(itemId, page);
-//        return ResponseEntity.ok(reviewPage);
-//    }
-//
-//    @Operation(summary = "유저 아이디로 리뷰 조회")
-//    @GetMapping("/{userId}/reviews")
-//    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByUserId(@RequestParam(value = "page", defaultValue = "1") int page, @PathVariable Long userId) {
-//        Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByUserId(userId, page);
-//        return ResponseEntity.ok(reviewPage);
-//    }
-//
-//    @Operation(summary="유저 아이디로 리뷰 조회 평점 높은 순 ")
-//    @GetMapping("/{userId}/reviews/HighScore")
-//    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByUserIdHighScore(@RequestParam(value = "page", defaultValue = "1") int page, @PathVariable Long userId) {
-//        Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByUserIdHighScore(userId, page);
-//        return ResponseEntity.ok(reviewPage);
-//    }
-//
-//    @Operation(summary="유저 아이디로 리뷰 조회 평점 낮은 순 ")
-//    @GetMapping("/{userId}/reviews/LowScore")
-//    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByUserIdLowScore(@RequestParam(value = "page", defaultValue = "1") int page, @PathVariable Long userId) {
-//        Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByUserIdLowScore(userId, page);
-//        return ResponseEntity.ok(reviewPage);
-//    }
 
-    @Operation(summary = "리뷰 삭제")
-    @DeleteMapping("/delete/{reviewId}")
-    public ResponseEntity<String> deleteReview(@PathVariable Long reviewId) {
-        reviewService.deleteReview(reviewId);
-        return ResponseEntity.ok("성공적으로 리뷰가 삭제되었습니다.");
+
+    @Operation(summary = "리뷰 삭제", description = "review id를 입력하세요, 로그인 한 사용자의 리뷰가 아니면 삭제가 되지않습니다.")
+    @DeleteMapping("{reviewId}")
+    public ResponseEntity<?> deleteReview(@PathVariable Long reviewId, HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute("user");
+        reviewService.deleteReview(reviewId, user);
+        return ResponseEntity.ok().build();
     }
 }
 
