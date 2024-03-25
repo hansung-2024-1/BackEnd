@@ -1,24 +1,22 @@
 package ahchacha.ahchacha.dto;
 
-import ahchacha.ahchacha.domain.Item;
-import ahchacha.ahchacha.domain.ItemReview;
-import ahchacha.ahchacha.domain.common.enums.Category;
-import ahchacha.ahchacha.domain.common.enums.PersonOrOfficial;
+import ahchacha.ahchacha.domain.Review;
 import ahchacha.ahchacha.domain.common.enums.PersonType;
-import ahchacha.ahchacha.domain.common.enums.Reservation;
 import lombok.*;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
+
+@NoArgsConstructor
+@Data
+@Builder
 public class ReviewDto {
     @Getter
     @Setter
     @Builder
     public static class ReviewRequestDto {
-        private Long userId;
         private Long itemId;
         private String reviewComment;
         private BigDecimal reviewScore;
@@ -29,8 +27,8 @@ public class ReviewDto {
     @Setter
     @Builder
     public static class ReviewResponseDto {
+        private String nickname;
         private Long reviewId;
-        private Long userId;
         private Long itemId;
         private String reviewComment;
         private BigDecimal reviewScore;
@@ -38,21 +36,21 @@ public class ReviewDto {
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
 
-        public static ReviewResponseDto toDto(ItemReview itemReview) {
+        public static ReviewResponseDto toDto(Review review) {
             return ReviewResponseDto.builder()
-                    .reviewId(itemReview.getId())
-                    .itemId(itemReview.getItem().getId())
-                    .userId(itemReview.getUser().getId())
-                    .reviewComment(itemReview.getReviewComment())
-                    .reviewScore(itemReview.getReviewScore())
-                    .personType(itemReview.getPersonType())
-                    .createdAt(itemReview.getCreatedAt())
-                    .updatedAt(itemReview.getUpdatedAt())
+                    .nickname(review.getUser().getNickname())
+                    .reviewId(review.getId())
+                    .itemId(review.getItem().getId())
+                    .reviewComment(review.getReviewComment())
+                    .reviewScore(review.getReviewScore())
+                    .personType(review.getPersonType())
+                    .createdAt(review.getCreatedAt())
+                    .updatedAt(review.getUpdatedAt())
                     .build();
         }
     }
 
-    public static Page<ReviewResponseDto> toDtoPage(Page<ItemReview> itemReviewPage) {
+    public static Page<ReviewResponseDto> toDtoPage(Page<Review> itemReviewPage) {
         return itemReviewPage.map(ReviewResponseDto::toDto);
     }
 }
