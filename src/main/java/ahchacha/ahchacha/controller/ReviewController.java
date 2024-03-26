@@ -1,18 +1,20 @@
 package ahchacha.ahchacha.controller;
 
-import ahchacha.ahchacha.domain.Item;
-import ahchacha.ahchacha.domain.ItemReview;
-import ahchacha.ahchacha.domain.common.enums.Category;
-import ahchacha.ahchacha.dto.ItemDto;
+import ahchacha.ahchacha.domain.Review;
+import ahchacha.ahchacha.domain.User;
+import ahchacha.ahchacha.domain.common.enums.PersonType;
 import ahchacha.ahchacha.dto.ReviewDto;
 import ahchacha.ahchacha.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/review")
@@ -24,106 +26,83 @@ public class ReviewController {
         this.reviewService = reviewService;
     }
 
-    @Operation(summary = "리뷰 목록 조회")
-    @GetMapping("/list")
-    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getAllReviews(@RequestParam(value = "page", defaultValue = "1") int page) {
-        Page<ReviewDto.ReviewResponseDto> reviewsResponseDto = reviewService.getAllReviews(page);
+    @Operation(summary = "리뷰 등록하기")
+    @PostMapping()
+    public ResponseEntity<ReviewDto.ReviewResponseDto> createReview(@RequestBody ReviewDto.ReviewRequestDto reviewRequestDto, HttpSession session) {
+
+        ReviewDto.ReviewResponseDto reviewResponseDto = reviewService.createReview(reviewRequestDto, session);
+        return new ResponseEntity<>(reviewResponseDto, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "리뷰 최신 목록 조회 RENTER")
+    @GetMapping("/list-renter")
+    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getAllReviewsRENTER(@RequestParam(value = "page", defaultValue = "1") int page) {
+        Page<ReviewDto.ReviewResponseDto> reviewsResponseDto = reviewService.getAllReviewsRENTER(page);
         return new ResponseEntity<>(reviewsResponseDto, HttpStatus.OK);
     }
 
-    // 리뷰 등록
-    @Operation(summary = "리뷰 등록하기")
-    @PostMapping("/{userId}/{itemId}")
-    public ResponseEntity<ItemReview> saveReview(@PathVariable Long userId, @PathVariable Long itemId, @RequestBody ReviewDto.ReviewRequestDto reviewDto) {
-        try {
-            ItemReview savedReview = reviewService.saveReview(userId, itemId, reviewDto);
-            return ResponseEntity.ok(savedReview);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+    @Operation(summary = "리뷰 최신 목록 조회 RECEIVER")
+    @GetMapping("/list-receiver")
+    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getAllReviewsRECEIVER(@RequestParam(value = "page", defaultValue = "1") int page) {
+        Page<ReviewDto.ReviewResponseDto> reviewsResponseDto = reviewService.getAllReviewsRECEIVER(page);
+        return new ResponseEntity<>(reviewsResponseDto, HttpStatus.OK);
     }
 
-    @Operation(summary = "아이템 아이디로 리뷰 조회")
-    @GetMapping("/{itemId}/reviews")
-    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByItemId(@RequestParam(value = "page", defaultValue = "1") int page, @PathVariable Long itemId) {
-        Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByItemId(itemId, page);
-        return ResponseEntity.ok(reviewPage);
+    @Operation(summary = "아이템 아이디로 리뷰 조회", description = "{itemId} 자리에 상세 조회할 아이템 id를 전달해주세요.")
+    @GetMapping("/{itemId}")
+    public ResponseEntity<ReviewDto.ReviewResponseDto> getReviewByItemId(@PathVariable Long itemId) {
+        ReviewDto.ReviewResponseDto review = reviewService.getReviewByItemId(itemId);
+        return ResponseEntity.ok(review);
     }
 
-    @Operation(summary="아이템 아이디로 리뷰 조회 평점 높은 순 ")
-    @GetMapping("/{itemId}/reviews/HighScore")
-    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByItemIdHighScore(@RequestParam(value = "page", defaultValue = "1") int page, @PathVariable Long itemId) {
-        Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByItemIdHighScore(itemId, page);
-        return ResponseEntity.ok(reviewPage);
+    @Operation(summary = "유저 아이디로 별점 높은순 2개 조회", description = "{userId} 자리에 userId를 전달해주세요.")
+    @GetMapping("/{userId}/renter_shortView") //피그마 대여물건상세페이지 유저 밑에 2개 리뷰에 쓰기
+    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByUserIdAndPersonTypeRENTERShortView(
+            @PathVariable Long userId,
+            @RequestParam(value = "page", defaultValue = "1") int page) {
+        Page<ReviewDto.ReviewResponseDto> reviews = reviewService.getReviewsByUserIdAndPersonTypeRENTERShortView(userId, page);
+        return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
 
-    @Operation(summary="아이템 아이디로 리뷰 조회 평점 낮은 순 ")
-    @GetMapping("/{itemId}/reviews/LowScore")
-    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByItemIdLowScore(@RequestParam(value = "page", defaultValue = "1") int page, @PathVariable Long itemId) {
-        Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByItemIdLowScore(itemId, page);
-        return ResponseEntity.ok(reviewPage);
+    @Operation(summary = "유저 아이디로 RENTER 별점 높은순 조회", description = "{userId} 자리에 userId를 전달해주세요.")
+    @GetMapping("/{userId}/renter_RENTER")
+    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByUserIdAndPersonTypeRENTER(
+            @PathVariable Long userId,
+            @RequestParam(value = "page", defaultValue = "1") int page) {
+        Page<ReviewDto.ReviewResponseDto> reviews = reviewService.getReviewsByUserIdAndPersonTypeRENTER(userId, page);
+        return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
 
-    @Operation(summary = "유저 아이디로 리뷰 조회")
-    @GetMapping("/{userId}/reviews")
-    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByUserId(@RequestParam(value = "page", defaultValue = "1") int page, @PathVariable Long userId) {
-        Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByUserId(userId, page);
-        return ResponseEntity.ok(reviewPage);
+    @Operation(summary = "유저 아이디로 RECEIVER 별점 높은순 조회", description = "{userId} 자리에 userId를 전달해주세요.")
+    @GetMapping("/{userId}/renter_RECEIVER")
+    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByUserIdAndPersonTypeRECEIVER(
+            @PathVariable Long userId,
+            @RequestParam(value = "page", defaultValue = "1") int page) {
+        Page<ReviewDto.ReviewResponseDto> reviews = reviewService.getReviewsByUserIdAndPersonTypeRECEIVER(userId, page);
+        return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
 
-    @Operation(summary="유저 아이디로 리뷰 조회 평점 높은 순 ")
-    @GetMapping("/{userId}/reviews/HighScore")
-    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByUserIdHighScore(@RequestParam(value = "page", defaultValue = "1") int page, @PathVariable Long userId) {
-        Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByUserIdHighScore(userId, page);
-        return ResponseEntity.ok(reviewPage);
+    @GetMapping("/{userId}/average/{personType}")
+    public ResponseEntity<BigDecimal> getAverageScoreByPersonType(
+            @PathVariable Long userId,
+            @PathVariable PersonType personType) {
+        BigDecimal averageScore = reviewService.getAverageScoreByUserIdAndPersonType(userId, personType);
+        return ResponseEntity.ok(averageScore);
     }
 
-    @Operation(summary="유저 아이디로 리뷰 조회 평점 낮은 순 ")
-    @GetMapping("/{userId}/reviews/LowScore")
-    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByUserIdLowScore(@RequestParam(value = "page", defaultValue = "1") int page, @PathVariable Long userId) {
-        Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByUserIdLowScore(userId, page);
-        return ResponseEntity.ok(reviewPage);
+    @GetMapping("/{userId}/average")
+    public ResponseEntity<BigDecimal> getOverallAverageScore(
+            @PathVariable Long userId) {
+        BigDecimal overallAverageScore = reviewService.getOverallAverageScoreByUserId(userId);
+        return ResponseEntity.ok(overallAverageScore);
     }
 
-    @Operation(summary = "리뷰 삭제")
-    @DeleteMapping("/delete/{reviewId}")
-    public ResponseEntity<String> deleteReview(@PathVariable Long reviewId) {
-        reviewService.deleteReview(reviewId);
-        return ResponseEntity.ok("성공적으로 리뷰가 삭제되었습니다.");
+    @Operation(summary = "리뷰 삭제", description = "review id를 입력하세요, 로그인 한 사용자의 리뷰가 아니면 삭제가 되지않습니다.")
+    @DeleteMapping("{reviewId}")
+    public ResponseEntity<?> deleteReview(@PathVariable Long reviewId, HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute("user");
+        reviewService.deleteReview(reviewId, user);
+        return ResponseEntity.ok().build();
     }
-
-
-
-    /*
-    @GetMapping("/{itemId}/reviews/high-score")
-    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByItemIdAndHighScore(@RequestParam(value = "page", defaultValue = "1") int page, @PathVariable Long itemId) {
-        Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByItemIdAndHighScore(page);
-        return ResponseEntity.ok(reviewPage);
-    }
-
-    @GetMapping("/{itemId}/reviews/low-score")
-    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByItemIdAndLowScore(@RequestParam(value = "page", defaultValue = "1") int page, @PathVariable Long itemId) {
-        Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByItemIdAndLowScore(page);
-        return ResponseEntity.ok(reviewPage);
-    }
-
-    @GetMapping("/{userId}/reviews")
-    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByUserId(@RequestParam(value = "page", defaultValue = "1") int page, @PathVariable Long userId) {
-        Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByUserId(page);
-        return ResponseEntity.ok(reviewPage);
-    }
-
-    @GetMapping("/{userId}/reviews/high-score")
-    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByUserIdAndHighScore(@RequestParam(value = "page", defaultValue = "1") int page, @PathVariable Long userId) {
-        Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByUserIdAndHighScore(page);
-        return ResponseEntity.ok(reviewPage);
-    }
-
-    @GetMapping("/{userId}/reviews/low-score")
-    public ResponseEntity<Page<ReviewDto.ReviewResponseDto>> getReviewsByUserIdAndLowScore(@RequestParam(value = "page", defaultValue = "1") int page, @PathVariable Long userId) {
-        Page<ReviewDto.ReviewResponseDto> reviewPage = reviewService.getReviewsByUserIdAndLowScore(page);
-        return ResponseEntity.ok(reviewPage);
-    }
-     */
 }
 

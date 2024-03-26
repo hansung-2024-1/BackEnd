@@ -1,6 +1,7 @@
 package ahchacha.ahchacha.dto;
 
 import ahchacha.ahchacha.domain.Item;
+import ahchacha.ahchacha.domain.User;
 import ahchacha.ahchacha.domain.common.enums.Category;
 import ahchacha.ahchacha.domain.common.enums.PersonOrOfficial;
 import ahchacha.ahchacha.domain.common.enums.Reservation;
@@ -17,7 +18,6 @@ public class ItemDto {
     @Setter
     @Builder
     public static class ItemRequestDto {
-        private Long userId;
         private String title;
         private int pricePerHour;
         private int firstPrice;
@@ -25,7 +25,6 @@ public class ItemDto {
         private LocalDateTime returnDateTime;
         private String borrowPlace;
         private String returnPlace;
-//        private PersonOrOfficial personOrOfficial;
         private Reservation reservation;
         private Category category;
     }
@@ -34,6 +33,7 @@ public class ItemDto {
     @Setter
     @Builder
     public static class ItemResponseDto {
+        private Long userId;
         private Long id;
         private String title;
         private int pricePerHour;
@@ -42,16 +42,17 @@ public class ItemDto {
         private LocalDateTime returnDateTime;
         private String borrowPlace;
         private String returnPlace;
-//        private PersonOrOfficial personOrOfficial;
         private Reservation reservation;
         private List<String> imageUrls;
         private Category category;
         private int viewCount;
+        private PersonOrOfficial personOrOfficial;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
 
         public static ItemResponseDto toDto(Item item) {
             return ItemResponseDto.builder()
+                    .userId(item.getUser().getId())
                     .id(item.getId())
                     .title(item.getTitle())
                     .pricePerHour(item.getPricePerHour())
@@ -60,11 +61,11 @@ public class ItemDto {
                     .returnDateTime(item.getReturnDateTime())
                     .borrowPlace(item.getBorrowPlace())
                     .returnPlace(item.getReturnPlace())
-//                    .personOrOfficial(item.getPersonOrOfficial())
                     .reservation(item.getReservation())
                     .imageUrls(item.getImageUrls())
                     .category(item.getCategory())
                     .viewCount(item.getViewCount())
+                    .personOrOfficial(item.getPersonOrOfficial())
                     .createdAt(item.getCreatedAt())
                     .updatedAt(item.getUpdatedAt())
                     .build();

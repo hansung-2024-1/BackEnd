@@ -1,11 +1,14 @@
 package ahchacha.ahchacha.controller;
 
 import ahchacha.ahchacha.domain.Item;
+import ahchacha.ahchacha.domain.User;
 import ahchacha.ahchacha.domain.common.enums.Category;
 import ahchacha.ahchacha.domain.common.enums.Reservation;
 import ahchacha.ahchacha.dto.ItemDto;
 import ahchacha.ahchacha.service.ItemService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +35,6 @@ public class ItemController {
     @Operation(summary = "아이템 등록", description = "canBorrowDateTime/returnDateTime 예시 : 2024-03-17T10:26:08")
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ItemDto.ItemResponseDto> create(@RequestPart(value = "file", required = false) List<MultipartFile> files,
-                                                          @RequestParam(name = "user") Long userId,
                                                           @RequestParam(name = "title") String title,
                                                           @RequestParam(name = "pricePerHour") int pricePerHour,
                                                           @RequestParam(name = "canBorrowDateTime") LocalDateTime canBorrowDateTime,
@@ -40,10 +42,10 @@ public class ItemController {
                                                           @RequestParam(name = "borrowPlace") String borrowPlace,
                                                           @RequestParam(name = "returnPlace") String returnPlace,
                                                           @RequestParam(name = "reservation") Reservation reservation,
-                                                          @RequestParam(name = "category") Category category){
+                                                          @RequestParam(name = "category") Category category,
+                                                          HttpSession session){
 
         ItemDto.ItemRequestDto itemRequestDto = ItemDto.ItemRequestDto.builder()
-                .userId(userId)
                 .title(title)
                 .pricePerHour(pricePerHour)
                 .canBorrowDateTime(canBorrowDateTime)
@@ -54,7 +56,7 @@ public class ItemController {
                 .category(category)
                 .build();
 
-        ItemDto.ItemResponseDto itemResponseDto = itemService.save(itemRequestDto, files, itemRequestDto.getUserId());
+        ItemDto.ItemResponseDto itemResponseDto = itemService.createItem(itemRequestDto, files, session);
         return new ResponseEntity<>(itemResponseDto, HttpStatus.CREATED);
     }
 
@@ -121,10 +123,11 @@ public class ItemController {
         return ResponseEntity.ok(itemPages);
     }
 
-    @Operation(summary = "등록한 아이템 삭제", description = "item의 id를 입력하세요")
+    @Operation(summary = "등록한 아이템 삭제", description = "item의 id를 입력하세요, 로그인 한 사용자의 물품이 아니면 삭제가 되지않습니다.")
     @DeleteMapping("/{itemId}")
-    public ResponseEntity<?> deleteItem(@PathVariable Long itemId) {
-        itemService.deleteItem(itemId);
+    public ResponseEntity<?> deleteItem(@PathVariable Long itemId, HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute("user");
+        itemService.deleteItem(itemId, user);
         return ResponseEntity.ok().build();
     }
 }

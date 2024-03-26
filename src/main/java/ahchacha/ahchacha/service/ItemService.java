@@ -9,6 +9,7 @@ import ahchacha.ahchacha.dto.ItemDto;
 import ahchacha.ahchacha.repository.ItemRepository;
 import ahchacha.ahchacha.repository.UserRepository;
 import ahchacha.ahchacha.repository.UuidRepository;
+import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -26,16 +27,14 @@ import java.util.UUID;
 @Service
 public class ItemService {
     private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
     private final UuidRepository uuidRepository;
     private final AmazonS3Manager s3Manager;
 
     @Transactional
-    public ItemDto.ItemResponseDto save(ItemDto.ItemRequestDto itemDto,
+    public ItemDto.ItemResponseDto createItem(ItemDto.ItemRequestDto itemDto,
                                         List<MultipartFile> files,
-                                        Long userId) {
-        User user = userRepository.findById(userId) //학번
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + userId));
+                                        HttpSession session) {
+        User user = (User) session.getAttribute("user");
 
         //이미지 업로드
         List<String> pictureUrls = new ArrayList<>(); // 이미지 URL들을 저장할 리스트
@@ -60,10 +59,10 @@ public class ItemService {
                 .returnDateTime(itemDto.getReturnDateTime())
                 .borrowPlace(itemDto.getBorrowPlace())
                 .returnPlace(itemDto.getReturnPlace())
-//                .personOrOfficial(itemDto.getPersonOrOfficial())
                 .reservation(itemDto.getReservation())
                 .imageUrls(pictureUrls)
                 .category(itemDto.getCategory())
+                .personOrOfficial(user.getPersonOrOfficial())
                 .build();
 
         item.setFirstPrice(itemDto.getPricePerHour());
@@ -116,7 +115,7 @@ public class ItemService {
 
     public Page<ItemDto.ItemResponseDto> getAllItemsByPersonOrOfficial(int page) {
         List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.asc("personOrOfficial")); // 예약가능여부와 같은 논리
+        sorts.add(Sort.Order.desc("personOrOfficial"));
         sorts.add(Sort.Order.desc("createdAt"));
 
         Pageable pageable = PageRequest.of(page-1, 6, Sort.by(sorts));
@@ -162,10 +161,15 @@ public class ItemService {
         return categoryCountDtos;
     }
 
-    public void deleteItem(Long itemId) {
-        if (!itemRepository.existsById(itemId)) {
-            throw new IllegalArgumentException("Invalid item Id: " + itemId);
+    public void deleteItem(Long itemId, User currentUser) {
+        Item item = itemRepository.findById(itemId).orElseThrow(()
+                -> new IllegalArgumentException("Invalid item Id: " + itemId));
+
+        // 아이템의 userId와 현재 세션의 userId가 같은지 확인
+        if (!item.getUser().getId().equals(currentUser.getId())) {
+            throw new IllegalArgumentException("You do not have permission to delete this item.");
         }
+
         itemRepository.deleteById(itemId);
     }
 }

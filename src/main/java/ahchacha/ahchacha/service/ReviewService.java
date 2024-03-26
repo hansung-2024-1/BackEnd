@@ -1,173 +1,122 @@
 package ahchacha.ahchacha.service;
 
 import ahchacha.ahchacha.domain.Item;
-import ahchacha.ahchacha.domain.ItemReview;
+import ahchacha.ahchacha.domain.Review;
 import ahchacha.ahchacha.domain.User;
+import ahchacha.ahchacha.domain.common.enums.PersonType;
+import ahchacha.ahchacha.dto.ItemDto;
 import ahchacha.ahchacha.dto.ReviewDto;
 import ahchacha.ahchacha.repository.ItemRepository;
 import ahchacha.ahchacha.repository.ReviewRepository;
 import ahchacha.ahchacha.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+@AllArgsConstructor
 @Service
 public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
 
-    @Autowired
-    public ReviewService(ReviewRepository reviewRepository, ItemRepository itemRepository, UserRepository userRepository) {
-        this.reviewRepository = reviewRepository;
-        this.userRepository = userRepository;
-        this.itemRepository = itemRepository;
-    }
+    @Transactional
+    public ReviewDto.ReviewResponseDto createReview(ReviewDto.ReviewRequestDto reviewDto, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        Optional<Item> item = itemRepository.findById(reviewDto.getItemId());
 
-    public ItemReview saveReview(Long userId, Long itemId, ReviewDto.ReviewRequestDto reviewDto) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + userId));
-        Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid item Id:" + itemId));
-
-        ItemReview review = ItemReview.builder()
+        Review review = Review.builder()
                 .user(user)
-                .item(item)
+                .item(item.orElseThrow(() -> new RuntimeException("Item not found")))
                 .reviewComment(reviewDto.getReviewComment())
                 .reviewScore(reviewDto.getReviewScore())
                 .personType(reviewDto.getPersonType())
                 .build();
 
-        return reviewRepository.save(review);
+        Review createdReview = reviewRepository.save(review);
+        return ReviewDto.ReviewResponseDto.toDto(createdReview);
     }
 
-    public Page<ReviewDto.ReviewResponseDto> getAllReviews(int page) {
+    public Page<ReviewDto.ReviewResponseDto> getAllReviewsRENTER(int page) {
         List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(Sort.Order.desc("createdAt"));
 
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<ItemReview> reviewPage = reviewRepository.findAll(pageable);
+        Pageable pageable = PageRequest.of(page - 1, 3, Sort.by(sorts));
+        Page<Review> reviewPage = reviewRepository.findByPersonType(PersonType.RENTER, pageable);
 
         return ReviewDto.toDtoPage(reviewPage);
     }
 
-    public Page<ReviewDto.ReviewResponseDto> getReviewsByItemId(Long id, int page) {
+    public Page<ReviewDto.ReviewResponseDto> getAllReviewsRECEIVER(int page) {
         List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(Sort.Order.desc("createdAt"));
 
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<ItemReview> reviewPage = reviewRepository.findByItemId(id, pageable);
+        Pageable pageable = PageRequest.of(page - 1, 3, Sort.by(sorts));
+        Page<Review> reviewPage = reviewRepository.findByPersonType(PersonType.RECEIVER, pageable);
 
         return ReviewDto.toDtoPage(reviewPage);
     }
 
-    public Page<ReviewDto.ReviewResponseDto> getReviewsByItemIdHighScore(Long id, int page) {
+    public ReviewDto.ReviewResponseDto getReviewByItemId(Long itemId) {
+        Review review = reviewRepository.findByItemId(itemId).orElseThrow(() -> new EntityNotFoundException("Review not found for item: " + itemId));
+        return ReviewDto.ReviewResponseDto.toDto(review);
+    }
+
+    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserIdAndPersonTypeRENTERShortView(Long userId, int page) {
         List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.desc("createdAt"));
         sorts.add(Sort.Order.desc("reviewScore"));
 
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<ItemReview> reviewPage = reviewRepository.findByItemId(id, pageable);
-
+        Pageable pageable = PageRequest.of(page-1, 2, Sort.by(sorts));
+        Page<Review> reviewPage = reviewRepository.findByUserIdAndPersonType(userId, PersonType.RENTER, pageable);
         return ReviewDto.toDtoPage(reviewPage);
     }
-    public Page<ReviewDto.ReviewResponseDto> getReviewsByItemIdLowScore(Long id, int page) {
+
+    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserIdAndPersonTypeRENTER(Long userId, int page) {
         List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.asc("createdAt"));
         sorts.add(Sort.Order.desc("reviewScore"));
-
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<ItemReview> reviewPage = reviewRepository.findByItemId(id, pageable);
-
-        return ReviewDto.toDtoPage(reviewPage);
-    }
-
-    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserId(Long id, int page) {
-        List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(Sort.Order.desc("createdAt"));
 
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<ItemReview> reviewPage = reviewRepository.findByUserId(id, pageable);
-
+        Pageable pageable = PageRequest.of(page-1, 3, Sort.by(sorts));
+        Page<Review> reviewPage = reviewRepository.findByUserIdAndPersonType(userId, PersonType.RENTER, pageable);
         return ReviewDto.toDtoPage(reviewPage);
     }
 
-    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserIdHighScore(Long id, int page) {
+    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserIdAndPersonTypeRECEIVER(Long userId, int page) {
         List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("reviewScore"));
         sorts.add(Sort.Order.desc("createdAt"));
-        sorts.add(Sort.Order.desc("reviewScore"));
 
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<ItemReview> reviewPage = reviewRepository.findByUserId(id, pageable);
-
+        Pageable pageable = PageRequest.of(page-1, 3, Sort.by(sorts));
+        Page<Review> reviewPage = reviewRepository.findByUserIdAndPersonType(userId, PersonType.RECEIVER, pageable);
         return ReviewDto.toDtoPage(reviewPage);
     }
-    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserIdLowScore(Long id, int page) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.asc("createdAt"));
-        sorts.add(Sort.Order.desc("reviewScore"));
 
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<ItemReview> reviewPage = reviewRepository.findByUserId(id, pageable);
+    public BigDecimal getAverageScoreByUserIdAndPersonType(Long userId, PersonType personType) {
+        return reviewRepository.findAverageScoreByUserIdAndPersonType(userId, personType);
+    }
 
-        return ReviewDto.toDtoPage(reviewPage);
+    public BigDecimal getOverallAverageScoreByUserId(Long userId) {
+        return reviewRepository.findAverageScoreByUserId(userId);
     }
 
     @Transactional
-    public void deleteReview(Long reviewId) {
-        ItemReview review = reviewRepository.findById(reviewId).orElseThrow(() ->
-                new IllegalArgumentException("Invalid review Id:"));
+    public void deleteReview(Long reviewId, User currentUser) {
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() ->
+                new IllegalArgumentException("Invalid review Id:" + reviewId));
+
+        if (!review.getUser().getId().equals(currentUser.getId())) {
+            throw new IllegalArgumentException("You do not have permission to delete this review.");
+        }
 
         reviewRepository.delete(review);
     }
-
-
-    /*public Page<ReviewDto.ReviewResponseDto> getReviewsByItemIdAndHighScore(int page) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.desc("score"));
-        sorts.add(Sort.Order.desc("createdAt"));
-
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<ItemReview> reviewPage = reviewRepository.findByItemIdAndHighScore(pageable);
-
-        return ReviewDto.toDtoPage(reviewPage);
-    }
-
-    public Page<ReviewDto.ReviewResponseDto> getReviewsByItemIdAndLowScore(int page) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.asc("score"));
-        sorts.add(Sort.Order.desc("createdAt"));
-
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<ItemReview> reviewPage = reviewRepository.findByItemIdAndLowScore(pageable);
-
-        return ReviewDto.toDtoPage(reviewPage);
-    }
-
-    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserIdAndHighScore(int page) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.desc("score"));
-        sorts.add(Sort.Order.desc("createdAt"));
-
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<ItemReview> reviewPage = reviewRepository.findByUserIdAndHighScore(pageable);
-
-        return ReviewDto.toDtoPage(reviewPage);
-    }
-
-    public Page<ReviewDto.ReviewResponseDto> getReviewsByUserIdAndLowScore(int page) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.desc("score"));
-        sorts.add(Sort.Order.desc("createdAt"));
-
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by(sorts));
-        Page<ItemReview> reviewPage = reviewRepository.findByUserIdAndLowScore(pageable);
-
-        return ReviewDto.toDtoPage(reviewPage);
-    }*/
 }
