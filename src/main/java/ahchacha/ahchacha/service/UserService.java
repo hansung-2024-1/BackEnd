@@ -148,18 +148,38 @@ public class UserService {
     }
 
     private static User getNewStudent(HttpSession session, long stuId) throws IOException {
-        String jjsUrl = "https://info.hansung.ac.kr/jsp_21/index.jsp";
+        String jjsUrl = "https://info.hansung.ac.kr/jsp_21/student/hakjuk/collage_register_1_rwd.jsp";
         Connection.Response response = ConnectionResponse.getResponse(session, jjsUrl);
+
+        String jjsUrl2 = "https://info.hansung.ac.kr/jsp_21/student/hakjuk/haksang_info2_h_rwd.jsp";
+        Connection.Response response2 = ConnectionResponse.getResponse(session, jjsUrl2);
+
+        Document doc2 = response2.parse();
+        String phoneNumberSelector = "#menu183_obj498 > ul > li:nth-child(2) > table > tbody > tr > td > input[type=text]";
+        Element inputElement = doc2.select(phoneNumberSelector).first();
+        String phoneNumber = "";
+
+        if (inputElement != null) {
+            phoneNumber = inputElement.attr("value").trim();
+        }
+
+
 
         Document doc = response.parse();
         Element link = doc.select("a.d-block").first();
 
+
+
+
+
         String text = link.html(); // "모바일소프트웨어트랙<br> 웹공학트랙<br> 김동욱"
+
         String[] split = text.split("<br>");
 
         String track1 = split[0].trim(); // "모바일소프트웨어트랙"
         String track2 = split[1].trim(); // "웹공학트랙"
         String name = split[2].trim(); // 김동욱
+
 
         return User.builder()
                 .id(stuId)
@@ -167,6 +187,7 @@ public class UserService {
                 .personOrOfficial(PersonOrOfficial.PERSON)
                 .track1(track1)
                 .track2(track2)
+                .phoneNumber(phoneNumber)
                 .build();
     }
 
@@ -204,10 +225,8 @@ public class UserService {
         Optional<User> existingUser = userRepository.findByNickname(nickname);
         if(existingUser.isPresent() && !existingUser.get().getId().equals(user.getId()))
             throw new IllegalStateException("이미 사용중인 닉네임 입니다.");
-
         // 닉네임 변경
         user.setNickname(nickname);
-
         // 변경된 사용자 정보를 데이터베이스에 저장
         userRepository.save(user);
     }
@@ -218,14 +237,7 @@ public class UserService {
         if (user == null) {
             throw new IllegalStateException("로그인이 필요합니다.");
         }
-
         user.setPersonOrOfficial(userType);
         userRepository.save(user);
     }
-
-
-
-
-
-
 }
