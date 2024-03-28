@@ -59,6 +59,7 @@ public class ItemService {
                 .returnDateTime(itemDto.getReturnDateTime())
                 .borrowPlace(itemDto.getBorrowPlace())
                 .returnPlace(itemDto.getReturnPlace())
+                .introduction((itemDto.getIntroduction()))
                 .reservation(itemDto.getReservation())
                 .imageUrls(pictureUrls)
                 .category(itemDto.getCategory())
